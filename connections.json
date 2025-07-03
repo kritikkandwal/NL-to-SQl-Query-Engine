@@ -1,0 +1,63 @@
+[
+  {
+    "Id": "86ac7cd9-907d-43ac-9c93-de9879db296b",
+    "Name": "Store Database Test",
+    "Type": 0,
+    "ConnectionString": "Data Source=databases/example_store.db",
+    "IsDefault": false,
+    "CreatedDate": "2025-07-02T19:51:13.5136748Z",
+    "Description": null,
+    "TableCount": 3,
+    "Tables": [
+      "products",
+      "suppliers",
+      "orders"
+    ]
+  },
+  {
+    "Id": "6ea122d0-0530-4878-94b2-60024c157c99",
+    "Name": "ttg",
+    "Type": 3,
+    "ConnectionString": "Server=52.66.101.241;Database=TTHHolidays;User ID=sa;Password=Iam100%dev;TrustServerCertificate=True;MultipleActiveResultSets=true;",
+    "IsDefault": false,
+    "CreatedDate": "2025-07-02T20:49:54.6959249Z",
+    "Description": null,
+    "TableCount": 20,
+    "Tables": [
+      "__EFMigrationsHistory",
+      "AdminLogins",
+      "Contact",
+      "Enquiry",
+      "FlightClasses",
+      "PreferredAirports",
+      "City",
+      "Continent",
+      "Country",
+      "Currency",
+      "DestinationLandingMaster",
+      "DestinationList",
+      "FAQ",
+      "Payment",
+      "UserSignup",
+      "DealsAccommodation",
+      "DealsHotel",
+      "DealsInclusionsExclusions",
+      "DealsItinerary",
+      "DealsPrices"
+    ]
+  },
+  {
+    "Id": "3f0e05f0-1c3d-46f0-8275-e31a69487b1a",
+    "Name": "local",
+    "Type": 1,
+    "ConnectionString": "Server=localhost;Database=nlpprojectdb;User=root;Password=Kri@080905;",
+    "IsDefault": false,
+    "CreatedDate": "2025-07-03T06:34:12.4674994Z",
+    "Description": null,
+    "TableCount": 2,
+    "Tables": [
+      "department",
+      "employee"
+    ]
+  }
+]

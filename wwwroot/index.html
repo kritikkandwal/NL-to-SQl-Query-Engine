@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP to SQL Query System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        .schema-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .query-section {
+            background: #fff;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .sql-display {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .results-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .results-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        .example-queries {
+            margin-top: 20px;
+        }
+        .example-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+        .example-btn:hover {
+            background: #e9ecef;
+        }
+        .schema-table {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .schema-table strong {
+            color: #007bff;
+        }
+        .database-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .database-selector select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .upload-section {
+            padding: 15px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .upload-section input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Natural Language to SQL Query System</h1>
+        <p class="subtitle">Convert your natural language questions into SQL queries and get results from the database</p>
+        
+        <div class="main-content">
+            <div class="schema-section">
+                <h2>Database Management</h2>
+                <div class="database-selector">
+                    <h3>Select Database</h3>
+                    <select id="databaseSelect" onchange="switchDatabase()">
+                        <option value="sample">Sample Database</option>
+                    </select>
+                    <button class="btn" onclick="refreshDatabases()" style="margin-left: 10px; padding: 8px 16px; font-size: 14px;">🔄 Refresh</button>
+                </div>
+                
+                <div class="connection-section" style="margin-top: 20px;">
+                    <h3>Add Database Connection</h3>
+                    <div style="margin-bottom: 10px;">
+                        <label for="dbType">Database Type:</label>
+                        <select id="dbType" style="margin-left: 10px; padding: 5px;">
+                            <option value="0">SQLite</option>
+                            <option value="1">MySQL</option>
+                            <option value="2">PostgreSQL</option>
+                            <option value="3">MSSQL</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="connName">Connection Name:</label>
+                        <input type="text" id="connName" placeholder="My Database" style="margin-left: 10px; padding: 5px; width: 200px;" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="connString">Connection String:</label>
+                        <input type="text" id="connString" placeholder="Server=localhost;Database=mydb;User=user;Password=pass;" style="margin-left: 10px; padding: 5px; width: 100%; margin-top: 5px;" />
+                    </div>
+                    <button class="btn" onclick="addConnection()" style="font-size: 14px; padding: 8px 16px;">Add Connection</button>
+                    <button class="btn" onclick="showConnectionExamples()" style="font-size: 14px; padding: 8px 16px; background: #6c757d;">Examples</button>
+                    <div id="connectionStatus"></div>
+                    <div id="connectionExamples" style="display: none; margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                        <h4>Connection String Examples:</h4>
+                        <p><strong>MySQL:</strong><br>
+                        <code>Server=localhost;Database=your_database;User=your_username;Password=your_password;</code></p>
+                        <p><strong>PostgreSQL:</strong><br>
+                        <code>Host=localhost;Database=your_database;Username=your_username;Password=your_password;</code></p>
+                        <p><strong>MSSQL:</strong><br>
+                        <code>Server=localhost;Database=your_database;User Id=your_username;Password=your_password;</code></p>
+                        <p><strong>SQLite:</strong><br>
+                        <code>Data Source=path/to/your/database.db</code></p>
+                    </div>
+                </div>
+                
+                <div class="upload-section" style="margin-top: 20px;">
+                    <h3>Upload SQLite Database</h3>
+                    <input type="file" id="fileInput" accept=".db,.sqlite,.sqlite3" onchange="uploadDatabase()" />
+                    <div id="uploadStatus"></div>
+                </div>
+                
+                <h3>Schema</h3>
+                <div id="schema-content">
+                    <div class="loading">Loading schema...</div>
+                </div>
+            </div>
+            
+            <div class="query-section">
+                <h2>Natural Language Query</h2>
+                <textarea id="queryInput" placeholder="Example: Show me all IT department employees with salary more than 50000"></textarea>
+                <button class="btn" onclick="processQuery()" id="processBtn">Generate SQL and Execute</button>
+                
+                <div class="example-queries">
+                    <h3>Example Queries</h3>
+                    <div id="examples"></div>
+                </div>
+                
+                <div class="results" id="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let currentDatabase = 'sample';
+        
+        // Load schema and examples on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDatabases();
+            loadSchema();
+            loadExamples();
+        });
+
+        async function loadDatabases() {
+            try {
+                // Load SQLite databases
+                const response = await fetch(`${API_BASE}/api/database/list`);
+                const data = await response.json();
+                
+                const select = document.getElementById('databaseSelect');
+                select.innerHTML = '';
+                
+                data.databases.forEach(db => {
+                    const option = document.createElement('option');
+                    option.value = db.id;
+                    option.textContent = db.isDefault ? db.name : `${db.name} (${db.tableCount} tables)`;
+                    if (db.id === currentDatabase) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                // Load database connections
+                try {
+                    const connResponse = await fetch(`${API_BASE}/api/connection/list`);
+                    const connData = await connResponse.json();
+                    
+                    connData.forEach(conn => {
+                        const option = document.createElement('option');
+                        option.value = `conn:${conn.id}`;
+                        option.textContent = `${conn.name} (${conn.type}) - ${conn.tableCount} tables`;
+                        select.appendChild(option);
+                    });
+                } catch (connError) {
+                    console.error('Error loading connections:', connError);
+                }
+            } catch (error) {
+                console.error('Error loading databases:', error);
+            }
+        }
+
+        async function addConnection() {
+            const name = document.getElementById('connName').value.trim();
+            const type = parseInt(document.getElementById('dbType').value);
+            const connectionString = document.getElementById('connString').value.trim();
+            const status = document.getElementById('connectionStatus');
+
+            if (!name || !connectionString) {
+                status.innerHTML = '<div class="error">Please provide connection name and connection string</div>';
+                return;
+            }
+
+            status.innerHTML = '<div class="loading">Testing connection...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/connection/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        type: type,
+                        connectionString: connectionString
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    status.innerHTML = `<div class="success">Connection added successfully! Found ${data.tableCount} tables.</div>`;
+                    document.getElementById('connName').value = '';
+                    document.getElementById('connString').value = '';
+                    await loadDatabases();
+                } else {
+                    status.innerHTML = `<div class="error">Connection failed: ${data.message || data.error}</div>`;
+                }
+            } catch (error) {
+                status.innerHTML = `<div class="error">Error adding connection: ${error.message}</div>`;
+            }
+        }
+
+        function showConnectionExamples() {
+            const examples = document.getElementById('connectionExamples');
+            examples.style.display = examples.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function switchDatabase() {
+            const select = document.getElementById('databaseSelect');
+            currentDatabase = select.value;
+            loadSchema();
+        }
+
+        function refreshDatabases() {
+            loadDatabases();
+            loadSchema();
+        }
+
+        async function uploadDatabase() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const uploadStatus = document.getElementById('uploadStatus');
+            
+            if (!file) return;
+            
+            uploadStatus.innerHTML = '<div class="loading">Uploading database...</div>';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/database/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    uploadStatus.innerHTML = `<div class="success">Database uploaded successfully! Found ${result.tableCount} tables.</div>`;
+                    currentDatabase = result.databaseId;
+                    await loadDatabases();
+                    await loadSchema();
+                    fileInput.value = '';
+                } else {
+                    uploadStatus.innerHTML = `<div class="error">${result.message}</div>`;
+                }
+            } catch (error) {
+                uploadStatus.innerHTML = `<div class="error">Error uploading database: ${error.message}</div>`;
+            }
+        }
+
+        async function loadSchema() {
+            try {
+                let response;
+                
+                // Check if this is a database connection or SQLite file
+                if (currentDatabase.startsWith('conn:')) {
+                    // Use connection schema API
+                    const connectionId = currentDatabase.substring(5);
+                    response = await fetch(`${API_BASE}/api/connection/${connectionId}/schema`);
+                } else {
+                    // Use SQLite database schema API
+                    response = await fetch(`${API_BASE}/api/database/${currentDatabase}/schema`);
+                }
+                
+                const data = await response.json();
+                
+                const schemaContent = document.getElementById('schema-content');
+                if (!data.success || Object.keys(data.schema).length === 0) {
+                    schemaContent.innerHTML = '<p>No schema available.</p>';
+                } else {
+                    let html = '';
+                    for (const [tableName, tableData] of Object.entries(data.schema)) {
+                        html += `<div class="schema-table">`;
+                        html += `<strong>${tableName}</strong><br>`;
+                        
+                        // Show columns
+                        if (tableData.columns) {
+                            tableData.columns.forEach(col => {
+                                const badges = [];
+                                if (col.primaryKey) badges.push('PK');
+                                if (col.notNull) badges.push('NOT NULL');
+                                const badgeStr = badges.length > 0 ? ` (${badges.join(', ')})` : '';
+                                html += `&nbsp;&nbsp;• ${col.name}: ${col.type}${badgeStr}<br>`;
+                            });
+                        }
+                        
+                        // Show foreign keys if any
+                        if (tableData.foreignKeys && tableData.foreignKeys.length > 0) {
+                            html += `&nbsp;&nbsp;<em>Foreign Keys:</em><br>`;
+                            tableData.foreignKeys.forEach(fk => {
+                                html += `&nbsp;&nbsp;&nbsp;&nbsp;${fk.column} → ${fk.referencedTable}.${fk.referencedColumn}<br>`;
+                            });
+                        }
+                        
+                        // Show sample data if available
+                        if (tableData.sampleData && tableData.sampleData.length > 0) {
+                            html += `&nbsp;&nbsp;<em>Sample data:</em><br>`;
+                            const sample = tableData.sampleData[0];
+                            const keys = Object.keys(sample).slice(0, 3);
+                            keys.forEach(key => {
+                                html += `&nbsp;&nbsp;&nbsp;&nbsp;${key}: ${sample[key]}<br>`;
+                            });
+                            if (Object.keys(sample).length > 3) {
+                                html += `&nbsp;&nbsp;&nbsp;&nbsp;...<br>`;
+                            }
+                        }
+                        
+                        html += `</div>`;
+                    }
+                    schemaContent.innerHTML = html;
+                }
+            } catch (error) {
+                // Fallback to old schema endpoint
+                try {
+                    const response = await fetch(`${API_BASE}/api/query/schema?databasePath=${currentDatabase}`);
+                    const schema = await response.json();
+                    
+                    const schemaContent = document.getElementById('schema-content');
+                    if (Object.keys(schema).length === 0) {
+                        schemaContent.innerHTML = '<p>No schema available. Process a query to initialize the database.</p>';
+                    } else {
+                        let html = '';
+                        for (const [tableName, columns] of Object.entries(schema)) {
+                            html += `<div class="schema-table">`;
+                            html += `<strong>${tableName}</strong><br>`;
+                            columns.forEach(col => {
+                                html += `&nbsp;&nbsp;• ${col}<br>`;
+                            });
+                            html += `</div>`;
+                        }
+                        schemaContent.innerHTML = html;
+                    }
+                } catch (fallbackError) {
+                    document.getElementById('schema-content').innerHTML = '<p class="error">Error loading schema</p>';
+                }
+            }
+        }
+
+        async function loadExamples() {
+            try {
+                const response = await fetch(`${API_BASE}/api/query/examples`);
+                const data = await response.json();
+                
+                const examplesDiv = document.getElementById('examples');
+                let html = '';
+                data.examples.forEach(example => {
+                    html += `<span class="example-btn" onclick="setQuery('${example}')">${example}</span>`;
+                });
+                examplesDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading examples:', error);
+            }
+        }
+
+        function setQuery(query) {
+            document.getElementById('queryInput').value = query;
+        }
+
+        async function processQuery() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+
+            const btn = document.getElementById('processBtn');
+            const results = document.getElementById('results');
+            
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            results.innerHTML = '<div class="loading">Processing your query...</div>';
+
+            try {
+                let response;
+                
+                // Check if this is a database connection or SQLite file
+                if (currentDatabase.startsWith('conn:')) {
+                    // Use connection API
+                    const connectionId = currentDatabase.substring(5);
+                    response = await fetch(`${API_BASE}/api/connection/${connectionId}/query`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ query: query })
+                    });
+                } else {
+                    // Use SQLite database API
+                    const requestBody = { query: query };
+                    if (currentDatabase !== 'sample') {
+                        requestBody.databasePath = `databases/${currentDatabase}`;
+                    }
+
+                    response = await fetch(`${API_BASE}/api/query/process`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                }
+
+                const data = await response.json();
+                displayResults(data);
+                
+                // Reload schema in case it was just created
+                loadSchema();
+                
+            } catch (error) {
+                results.innerHTML = `<div class="error">Error processing query: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate SQL and Execute';
+            }
+        }
+
+        function displayResults(data) {
+            const results = document.getElementById('results');
+            
+            if (!data.success) {
+                results.innerHTML = `<div class="error">${data.errorMessage || 'Unknown error occurred'}</div>`;
+                return;
+            }
+
+            let html = '<h3>Generated SQL Query</h3>';
+            html += `<div class="sql-display">${data.generatedSql}</div>`;
+            
+            if (data.results && data.results.length > 0) {
+                html += '<h3>Query Results</h3>';
+                html += `<div class="success">Found ${data.rowCount} record(s)</div>`;
+                
+                // Create table
+                html += '<table class="results-table">';
+                
+                // Headers
+                const headers = Object.keys(data.results[0]);
+                html += '<thead><tr>';
+                headers.forEach(header => {
+                    html += `<th>${header}</th>`;
+                });
+                html += '</tr></thead>';
+                
+                // Rows
+                html += '<tbody>';
+                data.results.forEach(row => {
+                    html += '<tr>';
+                    headers.forEach(header => {
+                        const value = row[header];
+                        html += `<td>${value !== null && value !== undefined ? value : ''}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+                
+            } else {
+                html += '<div class="success">Query executed successfully but no results found.</div>';
+            }
+
+            // Show metadata
+            if (data.metadata) {
+                html += '<h3>Query Information</h3>';
+                html += '<div class="sql-display">';
+                html += `Operation: ${data.metadata.operation}\n`;
+                html += `Tables Used: ${data.metadata.tablesUsed?.join(', ') || 'None'}\n`;
+                html += `Has Joins: ${data.metadata.hasJoins ? 'Yes' : 'No'}\n`;
+                html += `Has Aggregations: ${data.metadata.hasAggregations ? 'Yes' : 'No'}`;
+                html += '</div>';
+            }
+
+            results.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
