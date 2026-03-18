@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NlpToSqlApi.Models;
 using NlpToSqlApi.Services;
 using System.Text.Json;
@@ -138,7 +138,12 @@ namespace NlpToSqlApi.Controllers
             try
             {
                 using var dbManager = new UniversalDatabaseManager(connection.Type, connection.ConnectionString);
-                
+                var requestBody = new QueryRequest
+                {
+                    Query = request.Query,
+                    Language = "en" // ✅ Default to English for connections
+                };
+
                 // Check if query is already SQL
                 if (request.Query.Trim().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
                 {
@@ -156,7 +161,8 @@ namespace NlpToSqlApi.Controllers
                 else
                 {
                     // Process natural language query using simplified NLP
-                    var nlpResult = await ProcessNaturalLanguageQuery(dbManager, request.Query, connection.Type);
+                    var nlpResult = await ProcessNaturalLanguageQuery(dbManager, request.Query, connection.Type, requestBody.Language); // ✅ Updated with language param
+
                     nlpResult.DatabaseId = id;
                     return Ok(nlpResult);
                 }
@@ -174,7 +180,8 @@ namespace NlpToSqlApi.Controllers
             }
         }
 
-        private async Task<QueryResponse> ProcessNaturalLanguageQuery(UniversalDatabaseManager dbManager, string query, DatabaseType dbType)
+        private async Task<QueryResponse> ProcessNaturalLanguageQuery(UniversalDatabaseManager dbManager, string query, DatabaseType dbType, string language = "en") // ✅ Added language param
+
         {
             try
             {

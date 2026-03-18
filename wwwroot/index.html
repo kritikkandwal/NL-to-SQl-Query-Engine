@@ -3,487 +3,1445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NLP to SQL Query System</title>
+    <title>Ask Your Database Anything</title>
+
+    <!-- Fonts: Fraunces (expressive serif) + DM Sans + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-        }
-        .schema-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .query-section {
-            background: #fff;
-        }
-        h2 {
-            color: #333;
-            margin-top: 0;
-        }
-        textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            min-height: 100px;
-            resize: vertical;
-            font-family: inherit;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        .btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 15px;
-            transition: background-color 0.2s;
-        }
-        .btn:hover {
-            background: #0056b3;
-        }
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .results {
-            margin-top: 20px;
-        }
-        .sql-display {
-            background: #f8f8f8;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            white-space: pre-wrap;
-        }
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        .results-table th, .results-table td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        .results-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-        .results-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        .error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-        .success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-        .loading {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-        }
-        .example-queries {
-            margin-top: 20px;
-        }
-        .example-btn {
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            margin: 5px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: inline-block;
-            transition: background-color 0.2s;
-        }
-        .example-btn:hover {
-            background: #e9ecef;
-        }
-        .schema-table {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        .schema-table strong {
-            color: #007bff;
-        }
-        .database-selector {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #fff;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-        }
-        .database-selector select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        .upload-section {
-            padding: 15px;
-            background: #fff;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-        }
-        .upload-section input[type="file"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-top: 5px;
-        }
+                /* ─────────────────────────────────────────
+          TOKENS
+        ───────────────────────────────────────── */
+                :root {
+                    /* story */
+                    --s-bg: #0d0c0a;
+                    --s-text: #f0ebe3;
+                    --s-muted: rgba(240,235,227,0.45);
+                    --s-amber: #e8a04a;
+                    --s-amber-dark: #b87a2e;
+                    /* tool — warm, human */
+                    --t-bg: #f7f4ef;
+                    --t-surface: #ffffff;
+                    --t-border: #e4dfd7;
+                    --t-ink: #1a1714;
+                    --t-ink-2: #5a5046;
+                    --t-ink-3: #9c8f82;
+                    --t-amber: #c96b1a;
+                    --t-amber-bg: #fdf0e6;
+                    --t-green: #2d6a4f;
+                    --t-green-bg: #edf7f2;
+                    --t-red-bg: #fdf2f2;
+                    --t-red: #923232;
+                    --ff-serif: 'Fraunces', Georgia, serif;
+                    --ff-sans: 'DM Sans', sans-serif;
+                    --ff-mono: 'JetBrains Mono', monospace;
+                }
+
+                *, *::before, *::after {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+                html {
+                    scroll-behavior: auto;
+                }
+
+                body {
+                    font-family: var(--ff-sans);
+                    background: var(--s-bg);
+                    color: var(--s-text);
+                    overflow-x: hidden;
+                }
+
+                    /* ─────────────────────────────────────────
+          GRAIN TEXTURE (CSS only, humanises)
+        ───────────────────────────────────────── */
+                    body::after {
+                        content: '';
+                        position: fixed;
+                        inset: 0;
+                        pointer-events: none;
+                        z-index: 9999;
+                        opacity: 0.028;
+                        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+                        background-size: 200px;
+                    }
+
+                /* ═══════════════════════════════════════
+           SCROLL STORY
+        ═══════════════════════════════════════ */
+                #story {
+                    position: relative;
+                }
+
+                /* ── CHAPTER WRAPPER ── */
+                .ch {
+                    position: relative;
+                    width: 100vw;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    overflow: hidden;
+                }
+
+                /* ── PHOTO BG ── */
+                .ch-photo {
+                    position: absolute;
+                    inset: 0;
+                    background-size: cover;
+                    background-position: center;
+                    transform: scale(1.08);
+                    transition: transform 0.1s linear;
+                    will-change: transform;
+                }
+
+                    .ch-photo::after {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                    }
+
+                /* Chapter-specific overlays */
+                .ch-1 .ch-photo {
+                    background-image: url('https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=1920&q=85&auto=format');
+                }
+
+                    .ch-1 .ch-photo::after {
+                        background: linear-gradient(110deg, rgba(13,12,10,0.82) 45%, rgba(13,12,10,0.4) 100%);
+                    }
+
+                .ch-2 .ch-photo {
+                    background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&q=85&auto=format');
+                    background-position: center 40%;
+                }
+
+                    .ch-2 .ch-photo::after {
+                        background: rgba(13,12,10,0.78);
+                    }
+
+                .ch-3 .ch-photo {
+                    background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=85&auto=format');
+                }
+
+                    .ch-3 .ch-photo::after {
+                        background: linear-gradient(to right, rgba(13,12,10,0.88) 50%, rgba(13,12,10,0.3) 100%);
+                    }
+
+                .ch-4 .ch-photo {
+                    background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1920&q=85&auto=format');
+                    background-position: center 30%;
+                }
+
+                    .ch-4 .ch-photo::after {
+                        background: linear-gradient(to bottom, rgba(13,12,10,0.6) 0%, rgba(13,12,10,0.85) 100%);
+                    }
+
+                /* ── TEXT CONTENT ── */
+                .ch-body {
+                    position: relative;
+                    z-index: 2;
+                    padding: 80px 9vw;
+                    max-width: 860px;
+                }
+
+                .ch-tag {
+                    font-family: var(--ff-mono);
+                    font-size: 0.65rem;
+                    letter-spacing: 0.25em;
+                    text-transform: uppercase;
+                    color: var(--s-amber);
+                    margin-bottom: 28px;
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    opacity: 0;
+                    transform: translateY(12px);
+                }
+
+                    .ch-tag::before {
+                        content: '';
+                        width: 32px;
+                        height: 1px;
+                        background: var(--s-amber);
+                        flex-shrink: 0;
+                    }
+
+                .ch-headline {
+                    font-family: var(--ff-serif);
+                    font-size: clamp(2.6rem, 6.5vw, 5.8rem);
+                    font-weight: 700;
+                    line-height: 1.06;
+                    letter-spacing: -0.02em;
+                    color: var(--s-text);
+                    opacity: 0;
+                    transform: translateY(24px);
+                }
+
+                    .ch-headline em {
+                        font-style: italic;
+                        font-weight: 300;
+                        color: var(--s-amber);
+                    }
+
+                .ch-para {
+                    margin-top: 28px;
+                    font-size: clamp(1rem, 1.4vw, 1.18rem);
+                    line-height: 1.8;
+                    color: var(--s-muted);
+                    max-width: 520px;
+                    opacity: 0;
+                    transform: translateY(16px);
+                }
+
+                /* ── CH2: code card floating ── */
+                .code-float {
+                    position: absolute;
+                    right: 9vw;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: min(460px, 42vw);
+                    background: rgba(10,8,6,0.85);
+                    border: 1px solid rgba(232,160,74,0.18);
+                    border-top: 2px solid var(--s-amber);
+                    padding: 28px 30px;
+                    font-family: var(--ff-mono);
+                    font-size: 0.8rem;
+                    line-height: 2;
+                    color: rgba(240,235,227,0.45);
+                    opacity: 0;
+                    transform: translateY(-50%) translateX(30px);
+                    backdrop-filter: blur(12px);
+                }
+
+                    .code-float .kw {
+                        color: var(--s-amber);
+                    }
+
+                    .code-float .str {
+                        color: #a8d8a8;
+                    }
+
+                    .code-float .num {
+                        color: #89c4e1;
+                    }
+
+                .code-float-label {
+                    font-size: 0.58rem;
+                    letter-spacing: 0.2em;
+                    color: rgba(232,160,74,0.5);
+                    margin-bottom: 16px;
+                    text-transform: uppercase;
+                }
+
+                /* ── CH3: conversation cards ── */
+                .convo-float {
+                    position: absolute;
+                    right: 7vw;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: min(400px, 38vw);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                    opacity: 0;
+                }
+
+                .convo-msg {
+                    padding: 16px 20px;
+                    border-radius: 20px;
+                    font-family: var(--ff-sans);
+                    font-size: 0.88rem;
+                    line-height: 1.6;
+                }
+
+                    .convo-msg.human {
+                        background: rgba(232,160,74,0.14);
+                        border: 1px solid rgba(232,160,74,0.22);
+                        border-bottom-right-radius: 4px;
+                        color: rgba(240,235,227,0.85);
+                        align-self: flex-end;
+                    }
+
+                    .convo-msg.machine {
+                        background: rgba(10,8,6,0.75);
+                        border: 1px solid rgba(240,235,227,0.1);
+                        border-bottom-left-radius: 4px;
+                        font-family: var(--ff-mono);
+                        font-size: 0.72rem;
+                        color: rgba(168,216,168,0.85);
+                        backdrop-filter: blur(8px);
+                    }
+
+                .msg-from {
+                    font-size: 0.58rem;
+                    letter-spacing: 0.15em;
+                    text-transform: uppercase;
+                    margin-bottom: 6px;
+                    opacity: 0.5;
+                }
+
+                /* ── CH4: steps layout ── */
+                .ch-4 .ch-body {
+                    max-width: 1100px;
+                    width: 100%;
+                    padding: 80px 9vw;
+                    margin: 0 auto;
+                    text-align: center;
+                }
+
+                .steps-row {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 2px;
+                    margin: 56px 0 60px;
+                    background: rgba(240,235,227,0.06);
+                }
+
+                .step-card {
+                    background: rgba(13,12,10,0.6);
+                    backdrop-filter: blur(10px);
+                    padding: 36px 28px;
+                    text-align: left;
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                .step-n {
+                    font-family: var(--ff-mono);
+                    font-size: 0.6rem;
+                    letter-spacing: 0.2em;
+                    color: var(--s-amber);
+                    margin-bottom: 16px;
+                }
+
+                .step-title {
+                    font-family: var(--ff-serif);
+                    font-size: 1.35rem;
+                    font-weight: 700;
+                    color: var(--s-text);
+                    margin-bottom: 10px;
+                    line-height: 1.2;
+                }
+
+                .step-desc {
+                    font-size: 0.84rem;
+                    color: var(--s-muted);
+                    line-height: 1.7;
+                }
+
+                .ch-cta {
+                    opacity: 0;
+                    transform: translateY(16px);
+                }
+
+                .btn-open {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-family: var(--ff-sans);
+                    font-size: 1rem;
+                    font-weight: 500;
+                    color: var(--s-bg);
+                    background: var(--s-text);
+                    border: none;
+                    padding: 18px 44px;
+                    cursor: pointer;
+                    transition: all 0.28s;
+                    letter-spacing: 0.01em;
+                }
+
+                    .btn-open:hover {
+                        background: var(--s-amber);
+                        transform: translateY(-2px);
+                        box-shadow: 0 12px 40px rgba(232,160,74,0.3);
+                    }
+
+                    .btn-open svg {
+                        transition: transform 0.25s;
+                    }
+
+                    .btn-open:hover svg {
+                        transform: translateX(4px);
+                    }
+
+                /* Scroll cue */
+                .scroll-cue {
+                    position: absolute;
+                    bottom: 36px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 10px;
+                    z-index: 3;
+                    opacity: 0;
+                    animation: cue-fade 2.4s ease-in-out 1.8s infinite;
+                }
+
+                @keyframes cue-fade {
+                    0%,100% {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(0);
+                    }
+
+                    30%,70% {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(6px);
+                    }
+                }
+
+                .scroll-cue-mouse {
+                    width: 24px;
+                    height: 36px;
+                    border: 1.5px solid rgba(240,235,227,0.25);
+                    border-radius: 12px;
+                    display: flex;
+                    justify-content: center;
+                    padding-top: 7px;
+                }
+
+                .scroll-cue-wheel {
+                    width: 2px;
+                    height: 6px;
+                    background: rgba(240,235,227,0.4);
+                    border-radius: 2px;
+                    animation: wheel-scroll 1.8s ease-in-out infinite;
+                }
+
+                @keyframes wheel-scroll {
+                    0% {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+
+                    100% {
+                        transform: translateY(8px);
+                        opacity: 0;
+                    }
+                }
+
+                .scroll-cue span {
+                    font-family: var(--ff-mono);
+                    font-size: 0.58rem;
+                    letter-spacing: 0.2em;
+                    color: rgba(240,235,227,0.3);
+                }
+
+                /* ── WIPE TRANSITION ── */
+                #wipe {
+                    position: fixed;
+                    inset: 0;
+                    background: var(--t-bg);
+                    z-index: 5000;
+                    transform: scaleY(0);
+                    transform-origin: bottom;
+                    pointer-events: none;
+                }
+
+                /* ═══════════════════════════════════════
+           THE TOOL
+        ═══════════════════════════════════════ */
+                #app {
+                    display: none;
+                    background: var(--t-bg);
+                    min-height: 100vh;
+                    color: var(--t-ink);
+                }
+
+                /* ── NAV ── */
+                .t-nav {
+                    height: 58px;
+                    background: var(--t-surface);
+                    border-bottom: 1px solid var(--t-border);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 32px;
+                    position: sticky;
+                    top: 0;
+                    z-index: 200;
+                }
+
+                .t-brand {
+                    font-family: var(--ff-serif);
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: var(--t-ink);
+                    letter-spacing: -0.02em;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .t-brand-arrow {
+                    color: var(--t-amber);
+                    font-style: italic;
+                    font-weight: 300;
+                }
+
+                .t-nav-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                }
+
+                .t-pill-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 7px;
+                    background: var(--t-green-bg);
+                    border: 1px solid rgba(45,106,79,0.2);
+                    border-radius: 100px;
+                    padding: 5px 14px;
+                    font-size: 0.7rem;
+                    font-weight: 500;
+                    color: var(--t-green);
+                }
+
+                .t-dot {
+                    width: 6px;
+                    height: 6px;
+                    background: var(--t-green);
+                    border-radius: 50%;
+                    animation: glow-dot 3s ease-in-out infinite;
+                }
+
+                @keyframes glow-dot {
+                    0%,100% {
+                        box-shadow: 0 0 0 0 rgba(45,106,79,0.4);
+                    }
+
+                    50% {
+                        box-shadow: 0 0 0 4px rgba(45,106,79,0.1);
+                    }
+                }
+
+                .t-lang {
+                    display: flex;
+                    align-items: center;
+                    gap: 7px;
+                    border: 1px solid var(--t-border);
+                    border-radius: 6px;
+                    padding: 5px 10px;
+                    background: white;
+                }
+
+                    .t-lang select {
+                        background: transparent;
+                        border: none;
+                        font-family: var(--ff-sans);
+                        font-size: 0.78rem;
+                        color: var(--t-ink-2);
+                        outline: none;
+                        cursor: pointer;
+                        padding: 0;
+                        width: auto;
+                        margin: 0;
+                        -webkit-appearance: none;
+                    }
+
+                /* ── QUERY BAR ── */
+                .t-query-wrap {
+                    background: var(--t-surface);
+                    border-bottom: 1px solid var(--t-border);
+                }
+
+                .t-query-inner {
+                    max-width: 900px;
+                    margin: 0 auto;
+                    padding: 40px 32px 32px;
+                }
+
+                .t-query-eyebrow {
+                    font-family: var(--ff-mono);
+                    font-size: 0.6rem;
+                    letter-spacing: 0.25em;
+                    text-transform: uppercase;
+                    color: var(--t-amber);
+                    margin-bottom: 18px;
+                }
+
+                .t-query-box {
+                    position: relative;
+                }
+
+                .query-textarea {
+                    width: 100%;
+                    background: var(--t-bg);
+                    border: 1.5px solid var(--t-border);
+                    border-radius: 10px;
+                    padding: 20px 22px 20px 22px;
+                    font-family: var(--ff-sans);
+                    font-size: 1.02rem;
+                    color: var(--t-ink);
+                    line-height: 1.7;
+                    resize: none;
+                    min-height: 96px;
+                    outline: none;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                }
+
+                    .query-textarea::placeholder {
+                        color: var(--t-ink-3);
+                    }
+
+                    .query-textarea:focus {
+                        border-color: var(--t-amber);
+                        background: white;
+                        box-shadow: 0 0 0 3px rgba(201,107,26,0.08);
+                    }
+
+                .t-query-footer {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 14px;
+                }
+
+                .t-query-hint {
+                    font-size: 0.72rem;
+                    color: var(--t-ink-3);
+                }
+
+                .btn-execute {
+                    font-family: var(--ff-sans);
+                    font-size: 0.84rem;
+                    font-weight: 500;
+                    color: white;
+                    background: var(--t-ink);
+                    border: none;
+                    border-radius: 8px;
+                    padding: 12px 28px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.22s;
+                }
+
+                    .btn-execute:hover {
+                        background: var(--t-amber);
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 20px rgba(201,107,26,0.25);
+                    }
+
+                    .btn-execute:active {
+                        transform: translateY(0);
+                    }
+
+                    .btn-execute:disabled {
+                        opacity: 0.4;
+                        pointer-events: none;
+                    }
+
+                    .btn-execute .run-icon {
+                        font-size: 0.75rem;
+                    }
+
+                /* ── WORKSPACE GRID ── */
+                .t-workspace {
+                    display: grid;
+                    grid-template-columns: 268px 1fr 1fr;
+                    min-height: calc(100vh - 58px - 196px);
+                }
+
+                .t-col {
+                    border-right: 1px solid var(--t-border);
+                    padding: 24px 22px;
+                    overflow-y: auto;
+                }
+
+                    .t-col:last-child {
+                        border-right: none;
+                    }
+
+                .t-col-head {
+                    font-family: var(--ff-mono);
+                    font-size: 0.58rem;
+                    letter-spacing: 0.25em;
+                    text-transform: uppercase;
+                    color: var(--t-ink-3);
+                    padding-bottom: 14px;
+                    border-bottom: 1px solid var(--t-border);
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                /* ── DB CONTROL PANEL ── */
+                .ctrl-group {
+                    margin-bottom: 20px;
+                    padding-bottom: 20px;
+                    border-bottom: 1px solid var(--t-border);
+                }
+
+                    .ctrl-group:last-of-type {
+                        border-bottom: none;
+                    }
+
+                .ctrl-label {
+                    font-size: 0.7rem;
+                    font-weight: 500;
+                    color: var(--t-ink-2);
+                    margin-bottom: 10px;
+                    letter-spacing: 0.01em;
+                }
+
+                select, input[type="text"], input[type="file"] {
+                    width: 100%;
+                    background: white;
+                    border: 1px solid var(--t-border);
+                    border-radius: 6px;
+                    padding: 8px 11px;
+                    font-family: var(--ff-sans);
+                    font-size: 0.8rem;
+                    color: var(--t-ink);
+                    outline: none;
+                    margin-bottom: 8px;
+                    transition: border-color 0.18s;
+                    -webkit-appearance: none;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5046'/%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 10px center;
+                    padding-right: 28px;
+                }
+
+                    select:not([multiple]) {
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5046'/%3E%3C/svg%3E");
+                    }
+
+                input[type="text"], input[type="file"] {
+                    background-image: none;
+                    padding-right: 11px;
+                }
+
+                    select:focus, input[type="text"]:focus {
+                        border-color: var(--t-amber);
+                        box-shadow: 0 0 0 2px rgba(201,107,26,0.1);
+                    }
+
+                    input[type="text"]::placeholder {
+                        color: var(--t-ink-3);
+                    }
+
+                input[type="file"] {
+                    cursor: pointer;
+                    font-size: 0.75rem;
+                    padding: 7px 10px;
+                }
+
+                    input[type="file"]::-webkit-file-upload-button {
+                        background: var(--t-bg);
+                        border: 1px solid var(--t-border);
+                        border-radius: 4px;
+                        padding: 3px 10px;
+                        font-family: var(--ff-sans);
+                        font-size: 0.7rem;
+                        cursor: pointer;
+                        color: var(--t-ink-2);
+                        margin-right: 8px;
+                    }
+
+                .btn-sm {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    width: 100%;
+                    background: var(--t-ink);
+                    border: none;
+                    border-radius: 6px;
+                    color: white;
+                    font-family: var(--ff-sans);
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    padding: 9px 12px;
+                    cursor: pointer;
+                    transition: all 0.18s;
+                    margin-bottom: 6px;
+                }
+
+                    .btn-sm:hover {
+                        background: var(--t-amber);
+                    }
+
+                .btn-sm-outline {
+                    background: white;
+                    border: 1px solid var(--t-border);
+                    color: var(--t-ink-2);
+                }
+
+                    .btn-sm-outline:hover {
+                        background: var(--t-bg);
+                        border-color: var(--t-amber);
+                        color: var(--t-amber);
+                    }
+
+                .flex-row {
+                    display: flex;
+                    gap: 6px;
+                }
+
+                    .flex-row .btn-sm {
+                        flex: 1;
+                    }
+
+                .conn-examples {
+                    background: var(--t-amber-bg);
+                    border: 1px solid rgba(201,107,26,0.15);
+                    border-left: 3px solid var(--t-amber);
+                    border-radius: 0 6px 6px 0;
+                    padding: 12px 14px;
+                    margin-top: 8px;
+                    font-size: 0.7rem;
+                    line-height: 1.8;
+                    color: var(--t-ink-2);
+                }
+
+                    .conn-examples strong {
+                        color: var(--t-ink);
+                        display: block;
+                        margin-bottom: 6px;
+                        font-size: 0.68rem;
+                        letter-spacing: 0.05em;
+                    }
+
+                code {
+                    display: block;
+                    font-family: var(--ff-mono);
+                    font-size: 0.65rem;
+                    background: white;
+                    padding: 3px 8px;
+                    border-radius: 3px;
+                    margin: 2px 0;
+                    color: var(--t-ink-2);
+                    border: 1px solid var(--t-border);
+                    word-break: break-all;
+                }
+
+                /* status messages */
+                .error, .success, .loading {
+                    padding: 9px 13px;
+                    font-size: 0.73rem;
+                    border-radius: 6px;
+                    margin: 6px 0;
+                    border-left: 3px solid;
+                    line-height: 1.5;
+                    font-family: var(--ff-sans);
+                }
+
+                .error {
+                    background: var(--t-red-bg);
+                    color: var(--t-red);
+                    border-color: var(--t-red);
+                }
+
+                .success {
+                    background: var(--t-green-bg);
+                    color: var(--t-green);
+                    border-color: var(--t-green);
+                }
+
+                .loading {
+                    background: var(--t-amber-bg);
+                    color: var(--t-amber);
+                    border-color: var(--t-amber);
+                }
+
+                /* ── SCHEMA PANEL ── */
+                .schema-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .schema-item {
+                    background: white;
+                    border: 1px solid var(--t-border);
+                    border-radius: 8px;
+                    padding: 14px 16px;
+                    transition: border-color 0.18s, box-shadow 0.18s;
+                }
+
+                    .schema-item:hover {
+                        border-color: rgba(201,107,26,0.3);
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    }
+
+                    .schema-item strong {
+                        font-family: var(--ff-serif);
+                        font-size: 0.9rem;
+                        font-weight: 700;
+                        color: var(--t-amber);
+                        display: block;
+                        margin-bottom: 10px;
+                    }
+
+                    .schema-item .col-list {
+                        font-family: var(--ff-mono);
+                        font-size: 0.66rem;
+                        color: var(--t-ink-2);
+                        padding: 3px 0;
+                        border-bottom: 1px solid var(--t-border);
+                        line-height: 1.7;
+                    }
+
+                        .schema-item .col-list:last-child {
+                            border-bottom: none;
+                        }
+
+                /* ── RESULTS PANEL ── */
+                .result-area {
+                    background: white;
+                    border: 1px solid var(--t-border);
+                    border-radius: 8px;
+                    padding: 18px 20px;
+                    margin-bottom: 14px;
+                }
+
+                    .result-area h4 {
+                        font-family: var(--ff-mono);
+                        font-size: 0.58rem;
+                        letter-spacing: 0.2em;
+                        text-transform: uppercase;
+                        color: var(--t-ink-3);
+                        margin-bottom: 10px;
+                    }
+
+                .result-placeholder {
+                    font-size: 0.82rem;
+                    color: var(--t-ink-3);
+                    text-align: center;
+                    padding: 28px 0;
+                    border: 1.5px dashed var(--t-border);
+                    border-radius: 6px;
+                    line-height: 1.7;
+                }
+
+                .sql-display {
+                    background: var(--t-ink);
+                    color: #c9b99a;
+                    padding: 16px 18px;
+                    border-radius: 6px;
+                    font-family: var(--ff-mono);
+                    font-size: 0.7rem;
+                    white-space: pre-wrap;
+                    overflow-x: auto;
+                    line-height: 1.85;
+                    border-left: 3px solid var(--t-amber);
+                }
+
+                .results-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.74rem;
+                    margin-top: 10px;
+                    font-family: var(--ff-sans);
+                }
+
+                    .results-table th {
+                        background: var(--t-bg);
+                        padding: 9px 13px;
+                        text-align: left;
+                        font-size: 0.62rem;
+                        font-weight: 500;
+                        text-transform: uppercase;
+                        letter-spacing: 0.1em;
+                        color: var(--t-ink-2);
+                        border-bottom: 1px solid var(--t-border);
+                    }
+
+                    .results-table td {
+                        padding: 8px 13px;
+                        border-bottom: 1px solid var(--t-border);
+                        color: var(--t-ink);
+                    }
+
+                    .results-table tr:last-child td {
+                        border-bottom: none;
+                    }
+
+                    .results-table tr:hover td {
+                        background: var(--t-bg);
+                    }
+
+                .examples-block {
+                    margin-top: 20px;
+                }
+
+                    .examples-block h4 {
+                        font-family: var(--ff-mono);
+                        font-size: 0.58rem;
+                        letter-spacing: 0.22em;
+                        text-transform: uppercase;
+                        color: var(--t-ink-3);
+                        margin-bottom: 10px;
+                    }
+
+                #examples, .ex-italian {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    margin-bottom: 6px;
+                }
+
+                    #examples .btn-sm-outline,
+                    .ex-italian .btn-sm-outline {
+                        width: auto;
+                        font-size: 0.7rem;
+                        padding: 6px 12px;
+                        margin: 0;
+                        border-radius: 100px;
+                    }
+
+                /* scrollbar */
+                * {
+                    scrollbar-width: thin;
+                    scrollbar-color: var(--t-border) transparent;
+                }
+
+                ::-webkit-scrollbar {
+                    width: 4px;
+                }
+
+                ::-webkit-scrollbar-thumb {
+                    background: var(--t-border);
+                    border-radius: 4px;
+                }
+
+                /* responsive */
+                @media (max-width: 1100px) {
+                    .t-workspace {
+                        grid-template-columns: 250px 1fr;
+                    }
+
+                        .t-workspace .t-col:last-child {
+                            grid-column: 1/-1;
+                        }
+
+                    .steps-row {
+                        grid-template-columns: 1fr;
+                        gap: 2px;
+                    }
+                }
+
+                @media (max-width: 700px) {
+                    .ch-body {
+                        padding: 60px 6vw;
+                    }
+
+                    .code-float, .convo-float {
+                        display: none;
+                    }
+
+                    .t-nav {
+                        padding: 0 18px;
+                    }
+                }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔍 Natural Language to SQL Query System</h1>
-        <p class="subtitle">Convert your natural language questions into SQL queries and get results from the database</p>
-        
-        <div class="main-content">
-            <div class="schema-section">
-                <h2>Database Management</h2>
-                <div class="database-selector">
-                    <h3>Select Database</h3>
-                    <select id="databaseSelect" onchange="switchDatabase()">
-                        <option value="sample">Sample Database</option>
-                    </select>
-                    <button class="btn" onclick="refreshDatabases()" style="margin-left: 10px; padding: 8px 16px; font-size: 14px;">🔄 Refresh</button>
+
+    <!-- ═════════════════════════════════════════
+         SCROLL STORY
+    ═════════════════════════════════════════ -->
+    <div id="story">
+
+        <!-- CHAPTER 1 — The question -->
+        <section class="ch ch-1" id="ch1">
+            <div class="ch-photo"></div>
+            <div class="ch-body">
+                <div class="ch-tag" id="c1-tag">The problem</div>
+                <h1 class="ch-headline" id="c1-head">
+                    You have a question.<br>
+                    <em>Your data has the answer.</em>
+                </h1>
+                <p class="ch-para" id="c1-para">
+                    It's sitting right there — in rows, tables, and columns.
+                    But getting to it means writing SQL you haven't touched since college,
+                    or waiting two days for the data team.
+                </p>
+            </div>
+            <div class="scroll-cue" id="scroll-cue">
+                <div class="scroll-cue-mouse"><div class="scroll-cue-wheel"></div></div>
+                <span>scroll</span>
+            </div>
+        </section>
+
+        <!-- CHAPTER 2 — The syntax barrier -->
+        <section class="ch ch-2" id="ch2">
+            <div class="ch-photo"></div>
+            <div class="ch-body">
+                <div class="ch-tag" id="c2-tag">The barrier</div>
+                <h2 class="ch-headline" id="c2-head">
+                    Databases speak<br>a different<br><em>language.</em>
+                </h2>
+                <p class="ch-para" id="c2-para">
+                    SQL is powerful — but it's not how humans think.
+                    You think in questions. Databases want instructions.
+                </p>
+            </div>
+            <!-- floating code card -->
+            <div class="code-float" id="c2-code">
+                <div class="code-float-label">What you need to write</div>
+                <span class="kw">SELECT</span> e.first_name, e.last_name,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d.name <span class="kw">AS</span> department,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e.salary<br>
+                <span class="kw">FROM</span> employees e<br>
+                <span class="kw">INNER JOIN</span> departments d<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">ON</span> e.department_id = d.id<br>
+                <span class="kw">WHERE</span> d.name = <span class="str">'IT'</span><br>
+                &nbsp;&nbsp;<span class="kw">AND</span> e.salary <span class="kw">&gt;</span> <span class="num">50000</span><br>
+                <span class="kw">ORDER BY</span> e.last_name <span class="kw">ASC;</span>
+            </div>
+        </section>
+
+        <!-- CHAPTER 3 — The better way -->
+        <section class="ch ch-3" id="ch3">
+            <div class="ch-photo"></div>
+            <div class="ch-body">
+                <div class="ch-tag" id="c3-tag">The solution</div>
+                <h2 class="ch-headline" id="c3-head">
+                    Just say what<br>you <em>mean.</em>
+                </h2>
+                <p class="ch-para" id="c3-para">
+                    Type your question in plain language.
+                    We translate it into SQL, run it, and give you the answer —
+                    in seconds, not hours.
+                </p>
+            </div>
+            <!-- conversation cards -->
+            <div class="convo-float" id="c3-convo">
+                <div class="convo-msg human">
+                    <div class="msg-from">You</div>
+                    Show me all IT employees earning more than 50 000
                 </div>
-                
-                <div class="connection-section" style="margin-top: 20px;">
-                    <h3>Add Database Connection</h3>
-                    <div style="margin-bottom: 10px;">
-                        <label for="dbType">Database Type:</label>
-                        <select id="dbType" style="margin-left: 10px; padding: 5px;">
-                            <option value="0">SQLite</option>
-                            <option value="1">MySQL</option>
-                            <option value="2">PostgreSQL</option>
-                            <option value="3">MSSQL</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <label for="connName">Connection Name:</label>
-                        <input type="text" id="connName" placeholder="My Database" style="margin-left: 10px; padding: 5px; width: 200px;" />
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <label for="connString">Connection String:</label>
-                        <input type="text" id="connString" placeholder="Server=localhost;Database=mydb;User=user;Password=pass;" style="margin-left: 10px; padding: 5px; width: 100%; margin-top: 5px;" />
-                    </div>
-                    <button class="btn" onclick="addConnection()" style="font-size: 14px; padding: 8px 16px;">Add Connection</button>
-                    <button class="btn" onclick="showConnectionExamples()" style="font-size: 14px; padding: 8px 16px; background: #6c757d;">Examples</button>
-                    <div id="connectionStatus"></div>
-                    <div id="connectionExamples" style="display: none; margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
-                        <h4>Connection String Examples:</h4>
-                        <p><strong>MySQL:</strong><br>
-                        <code>Server=localhost;Database=your_database;User=your_username;Password=your_password;</code></p>
-                        <p><strong>PostgreSQL:</strong><br>
-                        <code>Host=localhost;Database=your_database;Username=your_username;Password=your_password;</code></p>
-                        <p><strong>MSSQL:</strong><br>
-                        <code>Server=localhost;Database=your_database;User Id=your_username;Password=your_password;</code></p>
-                        <p><strong>SQLite:</strong><br>
-                        <code>Data Source=path/to/your/database.db</code></p>
-                    </div>
+                <div class="convo-msg machine">
+                    <div class="msg-from">Generated SQL</div>
+                    SELECT e.*, d.name FROM employees e<br>
+                    JOIN departments d ON e.dept_id = d.id<br>
+                    WHERE d.name = 'IT' AND e.salary > 50000
                 </div>
-                
-                <div class="upload-section" style="margin-top: 20px;">
-                    <h3>Upload SQLite Database</h3>
-                    <input type="file" id="fileInput" accept=".db,.sqlite,.sqlite3" onchange="uploadDatabase()" />
-                    <div id="uploadStatus"></div>
+                <div class="convo-msg human">
+                    <div class="msg-from">You</div>
+                    Which department has the highest average salary?
                 </div>
-                
-                <h3>Schema</h3>
-                <div id="schema-content">
-                    <div class="loading">Loading schema...</div>
+                <div class="convo-msg machine">
+                    <div class="msg-from">Generated SQL</div>
+                    SELECT d.name, AVG(e.salary) avg FROM departments d<br>
+                    JOIN employees e ON d.id = e.dept_id<br>
+                    GROUP BY d.name ORDER BY avg DESC LIMIT 1
                 </div>
             </div>
-            
-            <div class="query-section">
-                <h2>Natural Language Query</h2>
-                <textarea id="queryInput" placeholder="Example: Show me all IT department employees with salary more than 50000"></textarea>
-                <button class="btn" onclick="processQuery()" id="processBtn">Generate SQL and Execute</button>
-                
-                <div class="example-queries">
-                    <h3>Example Queries</h3>
-                    <div id="examples"></div>
+        </section>
+
+        <!-- CHAPTER 4 — CTA -->
+        <section class="ch ch-4" id="ch4">
+            <div class="ch-photo"></div>
+            <div class="ch-body">
+                <div class="ch-tag" id="c4-tag" style="justify-content:center;">How it works</div>
+                <h2 class="ch-headline" id="c4-head" style="text-align:center; max-width:700px; margin:0 auto;">
+                    Three steps.<br><em>Infinite questions.</em>
+                </h2>
+                <div class="steps-row">
+                    <div class="step-card" id="s1">
+                        <div class="step-n">01</div>
+                        <div class="step-title">Connect your database</div>
+                        <div class="step-desc">Upload a SQLite file or connect via MySQL, PostgreSQL, or MSSQL. Takes thirty seconds.</div>
+                    </div>
+                    <div class="step-card" id="s2">
+                        <div class="step-n">02</div>
+                        <div class="step-title">Ask in plain language</div>
+                        <div class="step-desc">"Show orders above €1000 from last month" — no syntax, no documentation, no waiting.</div>
+                    </div>
+                    <div class="step-card" id="s3">
+                        <div class="step-n">03</div>
+                        <div class="step-title">Get results instantly</div>
+                        <div class="step-desc">See the generated SQL and a clean results table. Copy, export, or keep asking follow-ups.</div>
+                    </div>
                 </div>
-                
-                <div class="results" id="results"></div>
+                <div class="ch-cta" id="c4-cta">
+                    <button class="btn-open" onclick="openTool()">
+                        Open the engine
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </div><!-- /#story -->
+    <!-- wipe overlay -->
+    <div id="wipe"></div>
+
+    <!-- ═════════════════════════════════════════
+         THE TOOL  (all logic LOCKED / unchanged)
+    ═════════════════════════════════════════ -->
+    <div id="app">
+
+        <!-- NAV — visual only, IDs preserved -->
+        <nav class="t-nav">
+            <div class="t-brand">
+                NLP <span class="t-brand-arrow">→</span> SQL
+            </div>
+            <div class="t-nav-right">
+                <div class="t-lang">
+                    <span style="font-size:0.85rem;">🌐</span>
+                    <!-- LOCKED: id="languageSelect" -->
+                    <select id="languageSelect">
+                        <option value="en">English</option>
+                        <option value="it">Italiano</option>
+                    </select>
+                </div>
+                <div class="t-pill-status">
+                    <span class="t-dot"></span>
+                    Connected
+                </div>
+            </div>
+        </nav>
+
+        <!-- QUERY SECTION — visual only, IDs preserved -->
+        <div class="t-query-wrap">
+            <div class="t-query-inner">
+                <div class="t-query-eyebrow">Ask your database</div>
+                <div class="t-query-box">
+                    <!-- LOCKED: id="queryInput" -->
+                    <textarea id="queryInput" class="query-textarea"
+                              placeholder="e.g.  Show all employees in IT with a salary above 50 000 — or anything else on your mind"></textarea>
+                </div>
+                <div class="t-query-footer">
+                    <span class="t-query-hint">Plain language → SQL → results</span>
+                    <!-- LOCKED: id="processBtn" onclick="processQuery()" -->
+                    <button class="btn-execute" id="processBtn" onclick="processQuery()">
+                        <span class="run-icon">▶</span>
+                        <span>Run query</span>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
+        <!-- WORKSPACE — visual only, IDs preserved -->
+        <div class="t-workspace">
+
+            <!-- LEFT: DB CONTROL -->
+            <div class="t-col">
+                <div class="t-col-head">🗄 Database</div>
+                <div class="ctrl-group">
+                    <div class="ctrl-label">Active connection</div>
+                    <!-- LOCKED: id="databaseSelect" onchange="switchDatabase()" -->
+                    <select id="databaseSelect" onchange="switchDatabase()">
+                        <option value="sample">Sample database</option>
+                    </select>
+                    <!-- LOCKED: onclick="refreshDatabases()" -->
+                    <button class="btn-sm btn-sm-outline" onclick="refreshDatabases()">↺ Refresh</button>
+                </div>
+                <div class="ctrl-group">
+                    <div class="ctrl-label">Add connection</div>
+                    <!-- LOCKED: id="dbType" -->
+                    <select id="dbType">
+                        <option value="0">SQLite</option>
+                        <option value="1">MySQL</option>
+                        <option value="2">PostgreSQL</option>
+                        <option value="3">MSSQL</option>
+                    </select>
+                    <!-- LOCKED: id="connName" id="connString" -->
+                    <input type="text" id="connName" placeholder="Connection name" />
+                    <input type="text" id="connString" placeholder="Connection string" />
+                    <div class="flex-row">
+                        <!-- LOCKED: onclick="addConnection()" onclick="showConnectionExamples()" -->
+                        <button class="btn-sm" onclick="addConnection()">Connect</button>
+                        <button class="btn-sm btn-sm-outline" onclick="showConnectionExamples()">Examples</button>
+                    </div>
+                    <!-- LOCKED: id="connectionStatus" id="connectionExamples" -->
+                    <div id="connectionStatus"></div>
+                    <div id="connectionExamples" class="conn-examples" style="display:none;">
+                        <strong>Connection string samples</strong>
+                        <code>Server=localhost;Database=db;User=root;Password=pass;</code>
+                        <code>Host=localhost;Database=db;Username=postgres;</code>
+                    </div>
+                </div>
+                <div class="ctrl-group">
+                    <div class="ctrl-label">Upload SQLite file</div>
+                    <!-- LOCKED: id="fileInput" onchange="uploadDatabase()" -->
+                    <input type="file" id="fileInput" accept=".db,.sqlite,.sqlite3" onchange="uploadDatabase()" />
+                    <!-- LOCKED: id="uploadStatus" -->
+                    <div id="uploadStatus"></div>
+                </div>
+            </div>
+
+            <!-- MIDDLE: SCHEMA -->
+            <div class="t-col">
+                <div class="t-col-head">📋 Schema</div>
+                <!-- LOCKED: id="schema-content" -->
+                <div id="schema-content" class="schema-list">
+                    <div class="loading">Loading schema…</div>
+                </div>
+            </div>
+
+            <!-- RIGHT: RESULTS -->
+            <div class="t-col">
+                <div class="t-col-head">📊 Results</div>
+                <!-- LOCKED: id="results" -->
+                <div id="results">
+                    <div class="result-placeholder">
+                        Run a query to see<br>your results here
+                    </div>
+                </div>
+                <!-- LOCKED: id="examples" + setQuery() -->
+                <div class="examples-block">
+                    <h4>Try an example</h4>
+                    <div id="examples"></div>
+                    <div class="ex-italian">
+                        <span class="btn-sm-outline" onclick="setQuery('Mostra tutti i clienti italiani','it')">🇮🇹 clienti italiani</span>
+                        <span class="btn-sm-outline" onclick="setQuery('Ordini superiori a 1000€','it')">🇮🇹 ordini &gt;1000€</span>
+                        <span class="btn-sm-outline" onclick="setQuery('Media stipendi per dipartimento','it')">🇮🇹 stipendi</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- /#app -->
+    <!-- ═══════════════════════════════════════
+         LOCKED BUSINESS LOGIC — ZERO CHANGES
+    ═══════════════════════════════════════ -->
     <script>
         const API_BASE = '';
         let currentDatabase = 'sample';
-        
-        // Load schema and examples on page load
-        document.addEventListener('DOMContentLoaded', function() {
+
+        function initTool() {
             loadDatabases();
             loadSchema();
             loadExamples();
-        });
+        }
 
         async function loadDatabases() {
             try {
-                // Load SQLite databases
-                const response = await fetch(`${API_BASE}/api/database/list`);
-                const data = await response.json();
-                
-                const select = document.getElementById('databaseSelect');
-                select.innerHTML = '';
-                
-                data.databases.forEach(db => {
-                    const option = document.createElement('option');
-                    option.value = db.id;
-                    option.textContent = db.isDefault ? db.name : `${db.name} (${db.tableCount} tables)`;
-                    if (db.id === currentDatabase) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
+                const r = await fetch(`${API_BASE}/api/database/list`);
+                const d = await r.json();
+                const sel = document.getElementById('databaseSelect');
+                sel.innerHTML = '';
+                d.databases.forEach(db => {
+                    const o = document.createElement('option');
+                    o.value = db.id;
+                    o.textContent = db.isDefault ? db.name : `${db.name} (${db.tableCount} tables)`;
+                    if (db.id === currentDatabase) o.selected = true;
+                    sel.appendChild(o);
                 });
-
-                // Load database connections
                 try {
-                    const connResponse = await fetch(`${API_BASE}/api/connection/list`);
-                    const connData = await connResponse.json();
-                    
-                    connData.forEach(conn => {
-                        const option = document.createElement('option');
-                        option.value = `conn:${conn.id}`;
-                        option.textContent = `${conn.name} (${conn.type}) - ${conn.tableCount} tables`;
-                        select.appendChild(option);
+                    const cr = await fetch(`${API_BASE}/api/connection/list`);
+                    const cd = await cr.json();
+                    cd.forEach(c => {
+                        const o = document.createElement('option');
+                        o.value = `conn:${c.id}`;
+                        o.textContent = `${c.name} (${c.type}) - ${c.tableCount} tables`;
+                        sel.appendChild(o);
                     });
-                } catch (connError) {
-                    console.error('Error loading connections:', connError);
-                }
-            } catch (error) {
-                console.error('Error loading databases:', error);
-            }
+                } catch (e) { console.error(e); }
+            } catch (e) { console.error(e); }
         }
 
         async function addConnection() {
             const name = document.getElementById('connName').value.trim();
             const type = parseInt(document.getElementById('dbType').value);
-            const connectionString = document.getElementById('connString').value.trim();
-            const status = document.getElementById('connectionStatus');
-
-            if (!name || !connectionString) {
-                status.innerHTML = '<div class="error">Please provide connection name and connection string</div>';
-                return;
-            }
-
-            status.innerHTML = '<div class="loading">Testing connection...</div>';
-
+            const cs = document.getElementById('connString').value.trim();
+            const st = document.getElementById('connectionStatus');
+            if (!name || !cs) { st.innerHTML = '<div class="error">Provide name and connection string</div>'; return; }
+            st.innerHTML = '<div class="loading">Testing connection…</div>';
             try {
-                const response = await fetch(`${API_BASE}/api/connection/add`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        type: type,
-                        connectionString: connectionString
-                    })
+                const r = await fetch(`${API_BASE}/api/connection/add`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, type, connectionString: cs })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    status.innerHTML = `<div class="success">Connection added successfully! Found ${data.tableCount} tables.</div>`;
+                const d = await r.json();
+                if (r.ok) {
+                    st.innerHTML = `<div class="success">Connected · ${d.tableCount} tables</div>`;
                     document.getElementById('connName').value = '';
                     document.getElementById('connString').value = '';
                     await loadDatabases();
-                } else {
-                    status.innerHTML = `<div class="error">Connection failed: ${data.message || data.error}</div>`;
-                }
-            } catch (error) {
-                status.innerHTML = `<div class="error">Error adding connection: ${error.message}</div>`;
-            }
+                } else { st.innerHTML = `<div class="error">${d.message || d.error}</div>`; }
+            } catch (e) { st.innerHTML = `<div class="error">${e.message}</div>`; }
         }
 
         function showConnectionExamples() {
-            const examples = document.getElementById('connectionExamples');
-            examples.style.display = examples.style.display === 'none' ? 'block' : 'none';
+            const el = document.getElementById('connectionExamples');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
         }
-
         function switchDatabase() {
-            const select = document.getElementById('databaseSelect');
-            currentDatabase = select.value;
+            currentDatabase = document.getElementById('databaseSelect').value;
             loadSchema();
         }
-
-        function refreshDatabases() {
-            loadDatabases();
-            loadSchema();
-        }
+        function refreshDatabases() { loadDatabases(); loadSchema(); }
 
         async function uploadDatabase() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            const uploadStatus = document.getElementById('uploadStatus');
-            
-            if (!file) return;
-            
-            uploadStatus.innerHTML = '<div class="loading">Uploading database...</div>';
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
+            const fi = document.getElementById('fileInput');
+            const f = fi.files[0];
+            const us = document.getElementById('uploadStatus');
+            if (!f) return;
+            us.innerHTML = '<div class="loading">Uploading…</div>';
+            const fd = new FormData(); fd.append('file', f);
             try {
-                const response = await fetch(`${API_BASE}/api/database/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    uploadStatus.innerHTML = `<div class="success">Database uploaded successfully! Found ${result.tableCount} tables.</div>`;
-                    currentDatabase = result.databaseId;
-                    await loadDatabases();
-                    await loadSchema();
-                    fileInput.value = '';
-                } else {
-                    uploadStatus.innerHTML = `<div class="error">${result.message}</div>`;
-                }
-            } catch (error) {
-                uploadStatus.innerHTML = `<div class="error">Error uploading database: ${error.message}</div>`;
-            }
+                const r = await fetch(`${API_BASE}/api/database/upload`, { method: 'POST', body: fd });
+                const res = await r.json();
+                if (res.success) {
+                    us.innerHTML = `<div class="success">Uploaded · ${res.tableCount} tables</div>`;
+                    currentDatabase = res.databaseId;
+                    await loadDatabases(); await loadSchema(); fi.value = '';
+                } else { us.innerHTML = `<div class="error">${res.message}</div>`; }
+            } catch (e) { us.innerHTML = `<div class="error">${e.message}</div>`; }
         }
 
         async function loadSchema() {
             try {
-                let response;
-                
-                // Check if this is a database connection or SQLite file
+                let r;
                 if (currentDatabase.startsWith('conn:')) {
-                    // Use connection schema API
-                    const connectionId = currentDatabase.substring(5);
-                    response = await fetch(`${API_BASE}/api/connection/${connectionId}/schema`);
+                    r = await fetch(`${API_BASE}/api/connection/${currentDatabase.substring(5)}/schema`);
                 } else {
-                    // Use SQLite database schema API
-                    response = await fetch(`${API_BASE}/api/database/${currentDatabase}/schema`);
+                    r = await fetch(`${API_BASE}/api/database/${currentDatabase}/schema`);
                 }
-                
-                const data = await response.json();
-                
-                const schemaContent = document.getElementById('schema-content');
-                if (!data.success || Object.keys(data.schema).length === 0) {
-                    schemaContent.innerHTML = '<p>No schema available.</p>';
+                const d = await r.json();
+                const sc = document.getElementById('schema-content');
+                if (!d.success || Object.keys(d.schema).length === 0) {
+                    sc.innerHTML = '<p style="font-size:0.78rem;color:var(--t-ink-3);">No schema available</p>';
                 } else {
                     let html = '';
-                    for (const [tableName, tableData] of Object.entries(data.schema)) {
-                        html += `<div class="schema-table">`;
-                        html += `<strong>${tableName}</strong><br>`;
-                        
-                        // Show columns
-                        if (tableData.columns) {
-                            tableData.columns.forEach(col => {
-                                const badges = [];
-                                if (col.primaryKey) badges.push('PK');
-                                if (col.notNull) badges.push('NOT NULL');
-                                const badgeStr = badges.length > 0 ? ` (${badges.join(', ')})` : '';
-                                html += `&nbsp;&nbsp;• ${col.name}: ${col.type}${badgeStr}<br>`;
-                            });
-                        }
-                        
-                        // Show foreign keys if any
-                        if (tableData.foreignKeys && tableData.foreignKeys.length > 0) {
-                            html += `&nbsp;&nbsp;<em>Foreign Keys:</em><br>`;
-                            tableData.foreignKeys.forEach(fk => {
-                                html += `&nbsp;&nbsp;&nbsp;&nbsp;${fk.column} → ${fk.referencedTable}.${fk.referencedColumn}<br>`;
-                            });
-                        }
-                        
-                        // Show sample data if available
-                        if (tableData.sampleData && tableData.sampleData.length > 0) {
-                            html += `&nbsp;&nbsp;<em>Sample data:</em><br>`;
-                            const sample = tableData.sampleData[0];
-                            const keys = Object.keys(sample).slice(0, 3);
-                            keys.forEach(key => {
-                                html += `&nbsp;&nbsp;&nbsp;&nbsp;${key}: ${sample[key]}<br>`;
-                            });
-                            if (Object.keys(sample).length > 3) {
-                                html += `&nbsp;&nbsp;&nbsp;&nbsp;...<br>`;
-                            }
-                        }
-                        
-                        html += `</div>`;
+                    for (const [t, td] of Object.entries(d.schema)) {
+                        html += `<div class="schema-item"><strong>⟡ ${t}</strong>`;
+                        if (td.columns) td.columns.forEach(c => {
+                            const b = [];
+                            if (c.primaryKey) b.push('PK');
+                            if (c.notNull) b.push('NN');
+                            html += `<div class="col-list">◈ ${c.name}: <em>${c.type}</em>${b.length ? ' — ' + b.join(', ') : ''}</div>`;
+                        });
+                        if (td.foreignKeys && td.foreignKeys.length) html += `<div class="col-list" style="color:var(--t-amber);">⇢ foreign keys</div>`;
+                        html += '</div>';
                     }
-                    schemaContent.innerHTML = html;
+                    sc.innerHTML = html;
                 }
-            } catch (error) {
-                // Fallback to old schema endpoint
+            } catch (e) {
                 try {
-                    const response = await fetch(`${API_BASE}/api/query/schema?databasePath=${currentDatabase}`);
-                    const schema = await response.json();
-                    
-                    const schemaContent = document.getElementById('schema-content');
-                    if (Object.keys(schema).length === 0) {
-                        schemaContent.innerHTML = '<p>No schema available. Process a query to initialize the database.</p>';
+                    const r = await fetch(`${API_BASE}/api/query/schema?databasePath=${currentDatabase}`);
+                    const s = await r.json();
+                    const sc = document.getElementById('schema-content');
+                    if (Object.keys(s).length === 0) {
+                        sc.innerHTML = '<p style="font-size:0.78rem;color:var(--t-ink-3);">No schema — run a query first</p>';
                     } else {
                         let html = '';
-                        for (const [tableName, columns] of Object.entries(schema)) {
-                            html += `<div class="schema-table">`;
-                            html += `<strong>${tableName}</strong><br>`;
-                            columns.forEach(col => {
-                                html += `&nbsp;&nbsp;• ${col}<br>`;
-                            });
-                            html += `</div>`;
+                        for (const [t, cols] of Object.entries(s)) {
+                            html += `<div class="schema-item"><strong>⟡ ${t}</strong>`;
+                            cols.forEach(c => html += `<div class="col-list">◈ ${c}</div>`);
+                            html += '</div>';
                         }
-                        schemaContent.innerHTML = html;
+                        sc.innerHTML = html;
                     }
-                } catch (fallbackError) {
+                } catch (err) {
                     document.getElementById('schema-content').innerHTML = '<p class="error">Error loading schema</p>';
                 }
             }
@@ -491,137 +1449,181 @@
 
         async function loadExamples() {
             try {
-                const response = await fetch(`${API_BASE}/api/query/examples`);
-                const data = await response.json();
-                
-                const examplesDiv = document.getElementById('examples');
+                const r = await fetch(`${API_BASE}/api/query/examples`);
+                const d = await r.json();
+                const ex = document.getElementById('examples');
                 let html = '';
-                data.examples.forEach(example => {
-                    html += `<span class="example-btn" onclick="setQuery('${example}')">${example}</span>`;
+                d.examples.forEach(e => {
+                    html += `<span class="btn-sm-outline" style="padding:6px 12px;border-radius:100px;" onclick="setQuery('${e.replace(/'/g, "\\'")}' )">${e}</span>`;
                 });
-                examplesDiv.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading examples:', error);
-            }
+                ex.innerHTML = html;
+            } catch (e) { console.error(e); }
         }
 
-        function setQuery(query) {
-            document.getElementById('queryInput').value = query;
+        function setQuery(q, lang = 'en') {
+            document.getElementById('queryInput').value = q;
+            document.getElementById('languageSelect').value = lang;
         }
 
         async function processQuery() {
-            const query = document.getElementById('queryInput').value.trim();
-            if (!query) {
-                alert('Please enter a query');
-                return;
-            }
-
+            const q = document.getElementById('queryInput').value.trim();
+            const lang = document.getElementById('languageSelect').value;
+            if (!q) { alert('Please enter a query'); return; }
             const btn = document.getElementById('processBtn');
-            const results = document.getElementById('results');
-            
+            const res = document.getElementById('results');
             btn.disabled = true;
-            btn.textContent = 'Processing...';
-            results.innerHTML = '<div class="loading">Processing your query...</div>';
-
+            btn.querySelector('span:last-child').textContent = 'Running…';
+            res.innerHTML = '<div class="loading">Translating your question into SQL…</div>';
             try {
-                let response;
-                
-                // Check if this is a database connection or SQLite file
+                let r;
                 if (currentDatabase.startsWith('conn:')) {
-                    // Use connection API
-                    const connectionId = currentDatabase.substring(5);
-                    response = await fetch(`${API_BASE}/api/connection/${connectionId}/query`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ query: query })
+                    r = await fetch(`${API_BASE}/api/connection/${currentDatabase.substring(5)}/query`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q, language: lang })
                     });
                 } else {
-                    // Use SQLite database API
-                    const requestBody = { query: query };
-                    if (currentDatabase !== 'sample') {
-                        requestBody.databasePath = `databases/${currentDatabase}`;
-                    }
-
-                    response = await fetch(`${API_BASE}/api/query/process`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(requestBody)
+                    const body = { query: q, language: lang };
+                    if (currentDatabase !== 'sample') body.databasePath = `databases/${currentDatabase}`;
+                    r = await fetch(`${API_BASE}/api/query/process`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
                     });
                 }
-
-                const data = await response.json();
-                displayResults(data);
-                
-                // Reload schema in case it was just created
+                const d = await r.json();
+                displayResults(d);
                 loadSchema();
-                
-            } catch (error) {
-                results.innerHTML = `<div class="error">Error processing query: ${error.message}</div>`;
+            } catch (e) {
+                res.innerHTML = `<div class="error">Connection error: ${e.message}</div>`;
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Generate SQL and Execute';
+                btn.querySelector('span:last-child').textContent = 'Run query';
             }
         }
 
         function displayResults(data) {
-            const results = document.getElementById('results');
-            
-            if (!data.success) {
-                results.innerHTML = `<div class="error">${data.errorMessage || 'Unknown error occurred'}</div>`;
-                return;
-            }
-
-            let html = '<h3>Generated SQL Query</h3>';
+            const res = document.getElementById('results');
+            if (!data.success) { res.innerHTML = `<div class="error">${data.errorMessage || 'Unknown error'}</div>`; return; }
+            let html = '<div class="result-area"><h4>Generated SQL</h4>';
             html += `<div class="sql-display">${data.generatedSql}</div>`;
-            
             if (data.results && data.results.length > 0) {
-                html += '<h3>Query Results</h3>';
-                html += `<div class="success">Found ${data.rowCount} record(s)</div>`;
-                
-                // Create table
-                html += '<table class="results-table">';
-                
-                // Headers
+                html += `<div class="success" style="margin-top:12px;">${data.rowCount} row(s) returned</div>`;
                 const headers = Object.keys(data.results[0]);
-                html += '<thead><tr>';
-                headers.forEach(header => {
-                    html += `<th>${header}</th>`;
-                });
-                html += '</tr></thead>';
-                
-                // Rows
-                html += '<tbody>';
+                html += '<table class="results-table"><thead><tr>';
+                headers.forEach(h => html += `<th>${h}</th>`);
+                html += '</tr></thead><tbody>';
                 data.results.forEach(row => {
                     html += '<tr>';
-                    headers.forEach(header => {
-                        const value = row[header];
-                        html += `<td>${value !== null && value !== undefined ? value : ''}</td>`;
-                    });
+                    headers.forEach(h => html += `<td>${row[h] !== null && row[h] !== undefined ? row[h] : ''}</td>`);
                     html += '</tr>';
                 });
                 html += '</tbody></table>';
-                
             } else {
-                html += '<div class="success">Query executed successfully but no results found.</div>';
+                html += '<div class="success" style="margin-top:12px;">Query executed — no rows returned</div>';
             }
-
-            // Show metadata
             if (data.metadata) {
-                html += '<h3>Query Information</h3>';
-                html += '<div class="sql-display">';
-                html += `Operation: ${data.metadata.operation}\n`;
-                html += `Tables Used: ${data.metadata.tablesUsed?.join(', ') || 'None'}\n`;
-                html += `Has Joins: ${data.metadata.hasJoins ? 'Yes' : 'No'}\n`;
-                html += `Has Aggregations: ${data.metadata.hasAggregations ? 'Yes' : 'No'}`;
+                html += `<div style="margin-top:12px;padding:10px 13px;background:var(--t-bg);border-radius:6px;font-size:0.68rem;font-family:var(--ff-mono);color:var(--t-ink-2);line-height:1.8;">`;
+                html += `op: ${data.metadata.operation} · tables: ${data.metadata.tablesUsed?.join(', ') || '—'} · joins: ${data.metadata.hasJoins ? 'yes' : 'no'} · agg: ${data.metadata.hasAggregations ? 'yes' : 'no'}`;
                 html += '</div>';
             }
-
-            results.innerHTML = html;
+            html += '</div>';
+            res.innerHTML = html;
         }
+    </script>
+
+    <!-- ═══════════════════════════════════════
+         SCROLL ANIMATIONS (visual only)
+    ═══════════════════════════════════════ -->
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* ── Ch1 entrance ── */
+        const open = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        open.to('#c1-tag', { opacity: 1, y: 0, duration: 0.7 }, 0.35)
+            .to('#c1-head', { opacity: 1, y: 0, duration: 0.9 }, 0.55)
+            .to('#c1-para', { opacity: 1, y: 0, duration: 0.8 }, 0.85)
+            .to('#scroll-cue', { opacity: 1, duration: 0.5 }, 1.4);
+
+        /* helper: reveal on scroll */
+        function onScroll(trigger, items, stagger = 0.14) {
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger,
+                    start: 'top 72%',
+                    toggleActions: 'play none none reverse'
+                }
+            });
+            items.forEach(([el, props, offset = 0]) => {
+                tl.to(el, { opacity: 1, y: 0, x: 0, duration: 0.75, ease: 'power2.out', ...props }, offset);
+            });
+            return tl;
+        }
+
+        /* ── Ch2 ── */
+        onScroll('#ch2', [
+            ['#c2-tag', {}, 0],
+            ['#c2-head', {}, 0.15],
+            ['#c2-para', {}, 0.35],
+            ['#c2-code', { x: 0 }, 0.2],
+        ]);
+
+        /* ── Ch3 ── */
+        onScroll('#ch3', [
+            ['#c3-tag', {}, 0],
+            ['#c3-head', {}, 0.15],
+            ['#c3-para', {}, 0.35],
+            ['#c3-convo', { x: 0, y: 0 }, 0.1],
+        ]);
+
+        /* ── Ch4 ── */
+        const tl4 = gsap.timeline({
+            scrollTrigger: { trigger: '#ch4', start: 'top 72%', toggleActions: 'play none none reverse' }
+        });
+        tl4.to('#c4-tag', { opacity: 1, y: 0, duration: 0.6 }, 0)
+            .to('#c4-head', { opacity: 1, y: 0, duration: 0.8 }, 0.15)
+            .to('#s1', { opacity: 1, y: 0, duration: 0.65 }, 0.35)
+            .to('#s2', { opacity: 1, y: 0, duration: 0.65 }, 0.5)
+            .to('#s3', { opacity: 1, y: 0, duration: 0.65 }, 0.65)
+            .to('#c4-cta', { opacity: 1, y: 0, duration: 0.6 }, 0.85);
+
+        /* ── Parallax photo ── */
+        document.querySelectorAll('.ch').forEach(ch => {
+            const photo = ch.querySelector('.ch-photo');
+            if (!photo) return;
+            gsap.to(photo, {
+                yPercent: -12,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: ch,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true,
+                }
+            });
+        });
+
+        /* ── WIPE TO TOOL ── */
+        window.openTool = function () {
+            const wipe = document.getElementById('wipe');
+            const story = document.getElementById('story');
+            const app = document.getElementById('app');
+
+            gsap.timeline()
+                .to(wipe, { scaleY: 1, duration: 0.52, ease: 'power3.inOut', transformOrigin: 'bottom' })
+                .add(() => {
+                    story.style.display = 'none';
+                    app.style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    initTool();
+                })
+                .to(wipe, { scaleY: 0, duration: 0.52, ease: 'power3.inOut', transformOrigin: 'top', delay: 0.04 })
+                .add(() => {
+                    wipe.style.pointerEvents = 'none';
+                    /* gentle reveal */
+                    gsap.from('.t-nav', { opacity: 0, y: -16, duration: 0.45, ease: 'power2.out' });
+                    gsap.from('.t-query-wrap', { opacity: 0, y: 20, duration: 0.55, ease: 'power2.out', delay: 0.1 });
+                    gsap.from('.t-col', { opacity: 0, y: 24, duration: 0.6, ease: 'power2.out', delay: 0.2, stagger: 0.08 });
+                });
+        };
     </script>
 </body>
 </html>

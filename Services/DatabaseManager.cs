@@ -126,7 +126,7 @@ namespace NlpToSqlApi.Services
         }
 
         public void Dispose()
-        {
+        {       
             _connection?.Dispose();
         }
     }

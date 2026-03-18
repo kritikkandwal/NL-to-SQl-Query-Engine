@@ -59,5 +59,37 @@
       "department",
       "employee"
     ]
+  },
+  {
+    "Id": "d5d83a07-983d-4ab1-9e2d-d1a315faf70d",
+    "Name": "newproject",
+    "Type": 1,
+    "ConnectionString": "Server=localhost;Database=nlpprojectdb;User=root;Password=Kri@080905;",
+    "IsDefault": false,
+    "CreatedDate": "2025-07-27T05:24:05.6547413Z",
+    "Description": null,
+    "TableCount": 3,
+    "Tables": [
+      "department",
+      "employee",
+      "projects"
+    ]
+  },
+  {
+    "Id": "9c220f71-7305-4e3d-a22f-0d8f734283e7",
+    "Name": "TMS Local",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=TMSDatabase;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-02-27T16:14:33.2709382Z",
+    "Description": null,
+    "TableCount": 5,
+    "Tables": [
+      "Pricings",
+      "Roles",
+      "Vehicles",
+      "Users",
+      "Bookings"
+    ]
   }
 ]

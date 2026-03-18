@@ -1,4 +1,4 @@
-using NlpToSqlApi.Models;
+﻿using NlpToSqlApi.Models;
 
 namespace NlpToSqlApi.Services
 {
@@ -11,19 +11,21 @@ namespace NlpToSqlApi.Services
 
         public NlpToSqlService(string databasePath)
         {
-            _databaseManager = new DatabaseManager(databasePath);
+            _databaseManager = new DatabaseManager(databasePath);   
             _schemaAnalyzer = new SchemaAnalyzer(_databaseManager);
             _queryProcessor = new QueryProcessor();
             _sqlGenerator = new SqlGenerator(_schemaAnalyzer);
         }
 
-        public async Task<QueryResponse> ProcessQueryAsync(string naturalLanguageQuery)
+        public async Task<QueryResponse> ProcessQueryAsync(string naturalLanguageQuery, string language = "en") // ✅ Added language param
+
         {
             try
             {
                 // Process the natural language query
-                var processedQuery = _queryProcessor.ProcessQuery(naturalLanguageQuery);
-                
+                var processedQuery = _queryProcessor.ProcessQuery(naturalLanguageQuery, language); // ✅ Pass language
+
+
                 // Generate SQL from processed query
                 var sql = await _sqlGenerator.GenerateSqlAsync(processedQuery);
                 

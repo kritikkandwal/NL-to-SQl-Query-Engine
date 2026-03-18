@@ -1,6 +1,16 @@
+using Azure;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Mysqlx.Crud;
 using NlpToSqlApi.Models;
 using NlpToSqlApi.Services;
+using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Utilities.Collections;
+using System;
+using System.Diagnostics.Metrics;
+using System.Drawing;
+using System.Numerics;
 
 namespace NlpToSqlApi.Controllers
 {
@@ -54,7 +64,8 @@ namespace NlpToSqlApi.Controllers
                     });
                 }
 
-                var response = await nlpService.ProcessQueryAsync(request.Query);
+                var response = await nlpService.ProcessQueryAsync(request.Query, request.Language ?? "en");
+
                 return Ok(response);
             }
             catch (Exception ex)
@@ -256,3 +267,5 @@ namespace NlpToSqlApi.Controllers
         }
     }
 }
+
+

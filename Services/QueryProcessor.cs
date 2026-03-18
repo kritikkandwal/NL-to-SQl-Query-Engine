@@ -1,4 +1,7 @@
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using NlpToSqlApi.Models; // ✅ Updated to reflect correct namespace
+
 
 namespace NlpToSqlApi.Services
 {
@@ -33,42 +36,72 @@ namespace NlpToSqlApi.Services
             _joinKeywords = new[] { "with", "and", "along with", "including", "together with" };
         }
 
-        public ProcessedQuery ProcessQuery(string query)
+        // ✅ Updated
+        public ProcessedQuery ProcessQuery(string query, string language = "en")
         {
-            var lowerQuery = query.ToLower().Trim();
+            // ✅ Explicit resource selection
+            object resources;
+            if (language == "it")
+                resources = new ItalianLanguageResources();
+            else
+                resources = new EnglishLanguageResources();
+
+            var lowerQuery = query.ToLower(CultureInfo.CurrentCulture);
+
+            // ✅ Apply schema term translations
+            if (language == "it")
+            {
+                var italianResources = (ItalianLanguageResources)resources;
+                foreach (var term in italianResources.SchemaTerms)
+                {
+                    if (lowerQuery.Contains(term.Value))
+                        lowerQuery = lowerQuery.Replace(term.Value, term.Key);
+                }
+            }
 
             return new ProcessedQuery
             {
                 OriginalQuery = query,
-                Operation = DetectOperation(lowerQuery),
+                Operation = DetectOperation(lowerQuery, resources, language),
                 Tables = ExtractTableHints(lowerQuery),
                 Columns = ExtractColumnHints(lowerQuery),
-                Conditions = ExtractConditions(lowerQuery),
-                Aggregations = DetectAggregations(lowerQuery),
-                JoinsNeeded = DetectJoinsNeeded(lowerQuery)
+                Conditions = ExtractConditions(lowerQuery, resources, language),
+                Aggregations = DetectAggregations(lowerQuery, resources, language),
+                JoinsNeeded = DetectJoinsNeeded(lowerQuery, resources, language)
             };
         }
 
-        private string DetectOperation(string query)
+
+        // ✅ Updated
+        private string DetectOperation(string query, object resources, string language)
         {
-            foreach (var (operation, keywords) in _operationKeywords)
+            Dictionary<string, string[]> operationKeywords;
+
+            if (language == "it")
+                operationKeywords = ((ItalianLanguageResources)resources).OperationKeywords;
+            else
+                operationKeywords = ((EnglishLanguageResources)resources).OperationKeywords;
+
+            foreach (var operation in operationKeywords)
             {
-                if (keywords.Any(keyword => query.Contains(keyword)))
+                if (operation.Value.Any(keyword => query.Contains(keyword)))
                 {
-                    return operation;
+                    return operation.Key;
                 }
             }
             return "select";
         }
 
+
         private List<string> ExtractTableHints(string query)
         {
             var tableHints = new List<string>();
-            var commonTables = new[] 
-            { 
+            var commonTables = new[]
+            {
                 "employee", "employees", "department", "departments",
                 "salary", "salaries", "user", "users", "customer", "customers",
-                "order", "orders", "product", "products", "company", "companies"
+                "order", "orders", "product", "products", "company", "companies","bookings","vehicles","employees",
+                "departments","users","customers","orders","products","companies"
             };
 
             foreach (var table in commonTables)
@@ -89,7 +122,8 @@ namespace NlpToSqlApi.Services
             {
                 "name", "id", "salary", "age", "department", "email",
                 "phone", "address", "title", "position", "manager",
-                "created", "updated", "status", "price", "cost"
+                "created", "updated", "status", "price","BookingId","Source","", "cost",
+                "price","BookingId","Source","TotalFare", "cost","bookingid","source","totalfare"
             };
 
             foreach (var column in commonColumns)
@@ -103,19 +137,19 @@ namespace NlpToSqlApi.Services
             return columnHints.Distinct().ToList();
         }
 
-        private List<QueryCondition> ExtractConditions(string query)
+        // ✅ Updated
+        private List<QueryCondition> ExtractConditions(string query, object resources, string language)
         {
             var conditions = new List<QueryCondition>();
 
-            // Extract numeric conditions
             var numericPatterns = new[]
             {
-                @"(salary|age|price|cost|amount)\s*(more than|greater than|>)\s*(\d+)",
-                @"(salary|age|price|cost|amount)\s*(less than|<)\s*(\d+)",
-                @"(salary|age|price|cost|amount)\s*(equal to|equals|=)\s*(\d+)",
-                @"(salary|age|price|cost|amount)\s*(at least|>=)\s*(\d+)",
-                @"(salary|age|price|cost|amount)\s*(at most|<=)\s*(\d+)"
-            };
+        @"(salary|age|price|cost|amount)\s*(more than|greater than|>)\s*(\d+)",
+        @"(salary|age|price|cost|amount)\s*(less than|<)\s*(\d+)",
+        @"(salary|age|price|cost|amount)\s*(equal to|equals|=)\s*(\d+)",
+        @"(salary|age|price|cost|amount)\s*(at least|>=)\s*(\d+)",
+        @"(salary|age|price|cost|amount)\s*(at most|<=)\s*(\d+)"
+    };
 
             foreach (var pattern in numericPatterns)
             {
@@ -129,20 +163,19 @@ namespace NlpToSqlApi.Services
                     conditions.Add(new QueryCondition
                     {
                         Column = column,
-                        Operator = TextToOperator(operatorText),
+                        Operator = TextToOperator(operatorText, resources, language),
                         Value = int.Parse(value),
                         Type = "numeric"
                     });
                 }
             }
 
-            // Extract string conditions
             var stringPatterns = new[]
             {
-                @"(department|name|title|position)\s+(is|equals?)\s+([""']?)(\w+)\3",
-                @"in\s+(the\s+)?(\w+)\s+(department|team|group)",
-                @"(\w+)\s+(department|team|group)"
-            };
+        @"(department|name|title|position)\s+(is|equals?)\s+([""']?)(\w+)\3",
+        @"in\s+(the\s+)?(\w+)\s+(department|team|group)",
+        @"(\w+)\s+(department|team|group)"
+    };
 
             foreach (var pattern in stringPatterns)
             {
@@ -189,25 +222,30 @@ namespace NlpToSqlApi.Services
             return conditions;
         }
 
-        private List<AggregationFunction> DetectAggregations(string query)
+
+        // ✅ Updated
+        private List<AggregationFunction> DetectAggregations(string query, object resources, string language)
         {
             var aggregations = new List<AggregationFunction>();
 
-            foreach (var (function, keywords) in _operationKeywords)
+            Dictionary<string, string[]> aggregationKeywords;
+            if (language == "it")
+                aggregationKeywords = ((ItalianLanguageResources)resources).AggregationKeywords;
+            else
+                aggregationKeywords = ((EnglishLanguageResources)resources).AggregationKeywords;
+
+            foreach (var (function, keywords) in aggregationKeywords)
             {
-                if (new[] { "count", "max", "min", "avg", "sum" }.Contains(function))
+                foreach (var keyword in keywords)
                 {
-                    foreach (var keyword in keywords)
+                    if (query.Contains(keyword))
                     {
-                        if (query.Contains(keyword))
+                        aggregations.Add(new AggregationFunction
                         {
-                            aggregations.Add(new AggregationFunction
-                            {
-                                Function = function.ToUpper(),
-                                Keyword = keyword
-                            });
-                            break;
-                        }
+                            Function = function.ToUpper(),
+                            Keyword = keyword
+                        });
+                        break;
                     }
                 }
             }
@@ -215,62 +253,55 @@ namespace NlpToSqlApi.Services
             return aggregations;
         }
 
-        private bool DetectJoinsNeeded(string query)
+
+
+        // ✅ Updated
+        private bool DetectJoinsNeeded(string query, object resources, string language)
         {
             var tableHints = ExtractTableHints(query);
-            
             if (tableHints.Count > 1) return true;
 
-            foreach (var keyword in _joinKeywords)
+            string[] joinKeywords;
+            if (language == "it")
+                joinKeywords = ((ItalianLanguageResources)resources).JoinKeywords;
+            else
+                joinKeywords = ((EnglishLanguageResources)resources).JoinKeywords;
+
+            foreach (var keyword in joinKeywords)
             {
                 if (query.Contains(keyword)) return true;
             }
 
             var relationshipPatterns = new[]
             {
-                @"(\w+)\s+(and|with)\s+their\s+(\w+)",
-                @"(\w+)\s+in\s+(\w+)",
-                @"(\w+)\s+from\s+(\w+)"
-            };
+        @"(\w+)\s+(and|with)\s+their\s+(\w+)",
+        @"(\w+)\s+in\s+(\w+)",
+        @"(\w+)\s+from\s+(\w+)"
+    };
 
             return relationshipPatterns.Any(pattern => Regex.IsMatch(query, pattern, RegexOptions.IgnoreCase));
         }
 
-        private string TextToOperator(string text)
+
+        // ✅ Updated
+        private string TextToOperator(string text, object resources, string language) // ✅ Updated
         {
-            foreach (var (op, keywords) in _comparisonKeywords)
+            Dictionary<string, string[]> comparisonKeywords;
+
+            if (language == "it")
+                comparisonKeywords = ((ItalianLanguageResources)resources).ComparisonKeywords;
+            else
+                comparisonKeywords = ((EnglishLanguageResources)resources).ComparisonKeywords;
+
+            foreach (var comparison in comparisonKeywords)
             {
-                if (keywords.Contains(text.ToLower()))
+                if (comparison.Value.Contains(text.ToLower()))
                 {
-                    return op;
+                    return comparison.Key;
                 }
             }
+
             return "=";
         }
-    }
-
-    public class ProcessedQuery
-    {
-        public string OriginalQuery { get; set; } = string.Empty;
-        public string Operation { get; set; } = string.Empty;
-        public List<string> Tables { get; set; } = new();
-        public List<string> Columns { get; set; } = new();
-        public List<QueryCondition> Conditions { get; set; } = new();
-        public List<AggregationFunction> Aggregations { get; set; } = new();
-        public bool JoinsNeeded { get; set; }
-    }
-
-    public class QueryCondition
-    {
-        public string Column { get; set; } = string.Empty;
-        public string Operator { get; set; } = string.Empty;
-        public object Value { get; set; } = new();
-        public string Type { get; set; } = string.Empty;
-    }
-
-    public class AggregationFunction
-    {
-        public string Function { get; set; } = string.Empty;
-        public string Keyword { get; set; } = string.Empty;
     }
 }
