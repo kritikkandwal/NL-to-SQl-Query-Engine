@@ -91,5 +91,116 @@
       "Users",
       "Bookings"
     ]
+  },
+  {
+    "Id": "c23a30ac-d219-47ad-8d89-583c8e25284f",
+    "Name": "TMSDatabase",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=TMSDatabase;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-10-11T18:21:14.6128592Z",
+    "Description": null,
+    "TableCount": 5,
+    "Tables": [
+      "Pricings",
+      "Roles",
+      "Vehicles",
+      "Users",
+      "Bookings"
+    ]
+  },
+  {
+    "Id": "0c149149-fade-4b74-8800-8bcb948173f1",
+    "Name": "TMSDatabase",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=TMSDatabase;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-10-11T18:25:44.7119289Z",
+    "Description": null,
+    "TableCount": 5,
+    "Tables": [
+      "Pricings",
+      "Roles",
+      "Vehicles",
+      "Users",
+      "Bookings"
+    ]
+  },
+  {
+    "Id": "d3ad9de7-a264-409f-812e-62c2afd2e862",
+    "Name": "TMSDatabase",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=TMSDatabase;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-10-11T18:26:44.1253682Z",
+    "Description": null,
+    "TableCount": 5,
+    "Tables": [
+      "Pricings",
+      "Roles",
+      "Vehicles",
+      "Users",
+      "Bookings"
+    ]
+  },
+  {
+    "Id": "1bde17fb-8bf5-4de9-b800-7f851c3894bc",
+    "Name": "RetailDemoDB",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=RetailDemoDB;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-10-12T05:37:42.5367105Z",
+    "Description": "Sample retail data",
+    "TableCount": 8,
+    "Tables": [
+      "Departments",
+      "Employees",
+      "Customers",
+      "Categories",
+      "Suppliers",
+      "Products",
+      "Orders",
+      "OrderItems"
+    ]
+  },
+  {
+    "Id": "b1e6c559-9637-4968-891b-8a724d430235",
+    "Name": "RetailDemoDB",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=RetailDemoDB;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-10-12T05:54:47.9905588Z",
+    "Description": null,
+    "TableCount": 8,
+    "Tables": [
+      "Departments",
+      "Employees",
+      "Customers",
+      "Categories",
+      "Suppliers",
+      "Products",
+      "Orders",
+      "OrderItems"
+    ]
+  },
+  {
+    "Id": "01dc54fc-15f3-4543-8c6f-bbe88b388a4d",
+    "Name": "RetailDemoDB",
+    "Type": 3,
+    "ConnectionString": "Server=KRITIKKANDWAL-1;Database=RetailDemoDB;Trusted_Connection=True;TrustServerCertificate=True;",
+    "IsDefault": false,
+    "CreatedDate": "2026-10-12T06:27:36.4525289Z",
+    "Description": null,
+    "TableCount": 8,
+    "Tables": [
+      "Departments",
+      "Employees",
+      "Customers",
+      "Categories",
+      "Suppliers",
+      "Products",
+      "Orders",
+      "OrderItems"
+    ]
   }
 ]

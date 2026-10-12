@@ -14,6 +14,8 @@ namespace NlpToSqlApi.Services
         private readonly string _connectionString;
         private DbConnection? _connection;
 
+        public string CacheKey => $"{_databaseType}|{_connectionString}";
+
         public UniversalDatabaseManager(DatabaseType type, string connectionString)
         {
             _databaseType = type;
@@ -207,6 +209,26 @@ namespace NlpToSqlApi.Services
                 catch
                 {
                     // If PK query fails, continue without PK info
+                }
+            }
+
+            // SQL Server: INFORMATION_SCHEMA.COLUMNS carries no key info
+            if (_databaseType == DatabaseType.MSSQL)
+            {
+                var pkQuery = $@"
+                    SELECT kcu.COLUMN_NAME AS attname
+                    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+                    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+                      ON kcu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME AND kcu.TABLE_NAME = tc.TABLE_NAME AND kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA
+                    WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY' AND tc.TABLE_NAME = '{tableName.Replace("'", "''")}'";
+                try
+                {
+                    var pkColumns = (await ExecuteQueryAsync(pkQuery)).Select(r => r["attname"]?.ToString()).ToHashSet();
+                    foreach (var column in columns.Where(c => pkColumns.Contains(c.Name))) column.PrimaryKey = true;
+                }
+                catch
+                {
+                    // continue without PK info
                 }
             }
 

@@ -26,9 +26,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSingleton<INaturalLanguageSqlBuilder, NaturalLanguageSqlBuilder>();
+builder.Services.AddScoped<INaturalLanguageQueryService, NaturalLanguageQueryService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+app.UseDefaultFiles(); // Serve wwwroot/index.html at "/"
 app.UseStaticFiles(); // Enable static file serving
 
 if (app.Environment.IsDevelopment())
@@ -48,8 +52,8 @@ app.MapControllers();
 // Add a health check endpoint
 app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
 
-// Add root endpoint with API information
-app.MapGet("/", () => new 
+// API information endpoint (the root "/" now serves the UI from wwwroot/index.html)
+app.MapGet("/api", () => new
 { 
     name = "NLP to SQL API",
     version = "1.0.0",

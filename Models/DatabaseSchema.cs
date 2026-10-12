@@ -12,6 +12,8 @@ namespace NlpToSqlApi.Models
         public List<ColumnInfo> Columns { get; set; } = new();
         public List<string> PrimaryKeys { get; set; } = new();
         public List<string> ColumnNames { get; set; } = new();
+        /// <summary>Distinct values of short text columns (column name -> values), used to match words like "India" to a column.</summary>
+        public Dictionary<string, List<string>> ColumnValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
     public class ColumnInfo
